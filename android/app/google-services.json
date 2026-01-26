@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "237449985042",
+    "project_id": "taskssphere",
+    "storage_bucket": "taskssphere.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237449985042:android:3905959e2f206902966ccb",
+        "android_client_info": {
+          "package_name": "de.codesphere.taskssphere"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgu1NkDjixMbtNpe6GX4GJWK8ZJ8mUlyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
