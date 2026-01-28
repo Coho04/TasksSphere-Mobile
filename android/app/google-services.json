@@ -7,9 +7,28 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:237449985042:android:3905959e2f206902966ccb",
+        "mobilesdk_app_id": "1:237449985042:android:26805f7febdce07c966ccb",
         "android_client_info": {
           "package_name": "de.codesphere.taskssphere"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgu1NkDjixMbtNpe6GX4GJWK8ZJ8mUlyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237449985042:android:3905959e2f206902966ccb",
+        "android_client_info": {
+          "package_name": "de.codesphere.todo"
         }
       },
       "oauth_client": [],

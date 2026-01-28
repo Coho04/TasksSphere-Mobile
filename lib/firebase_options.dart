@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '237449985042',
     projectId: 'taskssphere',
     storageBucket: 'taskssphere.firebasestorage.app',
-    iosBundleId: 'de.codesphere.tasksphere',
+    iosBundleId: 'de.codesphere.todo',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '237449985042',
     projectId: 'taskssphere',
     storageBucket: 'taskssphere.firebasestorage.app',
-    iosBundleId: 'de.codesphere.tasksphere',
+    iosBundleId: 'de.codesphere.todo',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -78,4 +78,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'taskssphere.firebasestorage.app',
     measurementId: 'G-2S8MDWMTSH',
   );
+
 }

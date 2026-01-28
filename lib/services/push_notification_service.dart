@@ -12,6 +12,13 @@ class PushNotificationService {
   static final StreamController<RemoteMessage> _onMessageStreamController = StreamController<RemoteMessage>.broadcast();
   static Stream<RemoteMessage> get onMessageStream => _onMessageStreamController.stream;
 
+  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+    'taskssphere_channel_id', // id
+    'Tasks Notifications', // title
+    description: 'This channel is used for task notifications.', // description
+    importance: Importance.max,
+  );
+
   static bool get _isSupported {
     if (kIsWeb) return true;
     switch (defaultTargetPlatform) {
@@ -44,6 +51,13 @@ class PushNotificationService {
       },
     );
 
+    // Create Android Notification Channel
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      await _localNotificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_channel);
+    }
+
     if (!_isSupported) {
       debugPrint("Firebase Messaging is not supported on this platform.");
       return;
@@ -62,9 +76,15 @@ class PushNotificationService {
       debugPrint('User declined or has not accepted permission');
     }
 
-    // Get FCM Token
-    String? token = await _fcm.getToken();
-    debugPrint("FCM Token: $token");
+    // Set foreground notification options for iOS
+    await _fcm.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     // Listen to token refreshes
     _fcm.onTokenRefresh.listen((newToken) {
@@ -72,8 +92,35 @@ class PushNotificationService {
       updateTokenOnServer(newToken);
     });
 
-    // Handle background messages
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // Get FCM Token
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+        // Auf iOS/macOS warten wir kurz auf den APNS-Token
+        for (int i = 0; i < 6; i++) {
+          String? apnsToken = await _fcm.getAPNSToken();
+          if (apnsToken != null) {
+            String? token = await _fcm.getToken();
+            debugPrint("FCM Token: $token");
+            if (token != null) {
+              updateTokenOnServer(token);
+            }
+            break;
+          }
+          if (i < 5) {
+            debugPrint("Waiting for APNS token in PushNotificationService (attempt ${i + 1})...");
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
+      } else {
+        String? token = await _fcm.getToken();
+        debugPrint("FCM Token: $token");
+        if (token != null) {
+          updateTokenOnServer(token);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+    }
 
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -97,16 +144,30 @@ class PushNotificationService {
 
   static Future<void> updateTokenOnServer([String? token]) async {
     if (!_isSupported) return;
-    String? fcmToken = token ?? await _fcm.getToken();
-    if (fcmToken != null) {
-      final apiService = ApiService();
-      try {
-        // Dieser Endpoint muss in Laravel existieren
-        await apiService.dio.post('/user/fcm-token', data: {'fcm_token': fcmToken});
-        debugPrint("FCM Token updated on server");
-      } catch (e) {
-        debugPrint("Error updating FCM token on server: $e (This is expected if the endpoint is not yet implemented)");
+    
+    try {
+      String? fcmToken = token;
+      if (fcmToken == null) {
+        if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+          if (await _fcm.getAPNSToken() == null) {
+            return;
+          }
+        }
+        fcmToken = await _fcm.getToken();
       }
+
+      if (fcmToken != null) {
+        final apiService = ApiService();
+        try {
+          // Dieser Endpoint muss in Laravel existieren
+          await apiService.dio.post('/user/fcm-token', data: {'fcm_token': fcmToken});
+          debugPrint("FCM Token updated on server");
+        } catch (e) {
+          debugPrint("Error updating FCM token on server: $e (This is expected if the endpoint is not yet implemented)");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
     }
   }
 
@@ -114,12 +175,23 @@ class PushNotificationService {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'taskssphere_channel_id',
       'Tasks Notifications',
+      channelDescription: 'This channel is used for task notifications.',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: true,
     );
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    const DarwinNotificationDetails darwinPlatformChannelSpecifics = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: darwinPlatformChannelSpecifics,
+      macOS: darwinPlatformChannelSpecifics,
+    );
 
     await _localNotificationsPlugin.show(
       message.hashCode,

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
@@ -9,6 +10,7 @@ import 'screens/webview_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'firebase_options.dart';
 import 'services/push_notification_service.dart';
 
@@ -18,7 +20,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await PushNotificationService.initialize();
-  
+
+  String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  debugPrint('APNs device token: $apnsToken');
+
+
   runApp(
     MultiProvider(
       providers: [
@@ -37,6 +43,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TasksSphere',
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ],
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
