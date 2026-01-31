@@ -143,6 +143,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
             debugPrint('Page started loading: $url');
             // Bei jedem Seitenstart die Bridge injizieren
             _injectLoggingBridge();
+            _applySafeAreaFix();
             
             // Log analytics event
             FirebaseAnalytics.instance.logScreenView(
@@ -151,6 +152,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
           },
           onPageFinished: (String url) {
             debugPrint('Page finished loading: $url');
+            _applySafeAreaFix();
             if (Platform.isAndroid) {
               _fixLocalhostUrls();
             }
@@ -233,6 +235,34 @@ Page resource error:
     _mobileController.runJavaScript(js);
   }
 
+  void _applySafeAreaFix() {
+    const String js = """
+      (function() {
+        var meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+          if (!meta.content.includes('viewport-fit=cover')) {
+            meta.content += ", viewport-fit=cover";
+          }
+        } else {
+          meta = document.createElement('meta');
+          meta.name = "viewport";
+          meta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
+          document.head.appendChild(meta);
+        }
+        
+        // Versuche, Padding zu setzen, falls die App es nicht selbst tut
+        // Wir nutzen eine kleine Verzögerung, um sicherzugehen, dass das DOM stabil ist
+        setTimeout(function() {
+          if (window.getComputedStyle(document.body).paddingBottom === '0px') {
+            document.body.style.paddingTop = 'env(safe-area-inset-top)';
+            document.body.style.paddingBottom = 'env(safe-area-inset-bottom)';
+          }
+        }, 500);
+      })();
+    """;
+    _mobileController.runJavaScript(js);
+  }
+
   void _fixLocalhostUrls() {
     // JavaScript-Hack, um localhost-URLs durch 10.0.2.2 zu ersetzen
     const String js = """
@@ -302,22 +332,21 @@ Page resource error:
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: !_isInitialized
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('images/taskssphere_only_logo.png', height: 100),
-                    const SizedBox(height: 24),
-                    const CircularProgressIndicator(),
-                  ],
-                ),
-              )
-            : _isWindows
-                ? win.Webview(_winController)
-                : WebViewWidget(controller: _mobileController),
-      ),
+      backgroundColor: Colors.white,
+      body: !_isInitialized
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('images/taskssphere_only_logo.png', height: 100),
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(),
+                ],
+              ),
+            )
+          : _isWindows
+              ? win.Webview(_winController)
+              : WebViewWidget(controller: _mobileController),
     );
   }
 }
