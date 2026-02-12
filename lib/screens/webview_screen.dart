@@ -8,6 +8,7 @@ import 'package:webview_windows/webview_windows.dart' as win;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/push_notification_service.dart';
 
 class WebViewScreen extends StatefulWidget {
@@ -109,12 +110,22 @@ class _WebViewScreenState extends State<WebViewScreen> {
     debugPrint('  FCM Token: $_fcmToken');
     debugPrint('  Device ID: $_deviceId');
 
+    final prefs = await SharedPreferences.getInstance();
+    final String? authToken = prefs.getString('auth_token');
+
     // User-Agent anpassen, damit der Token bei jedem Request dabei ist (auch Sub-Resources)
-    String customUserAgent = "TasksSphereMobile; FCM-Token: ${_fcmToken ?? 'none'}; Device-ID: ${_deviceId ?? 'none'}";
+    String customUserAgent = "TasksSphereMobile; Auth-Token: ${authToken ?? 'none'}; FCM-Token: ${_fcmToken ?? 'none'}; Device-ID: ${_deviceId ?? 'none'}";
     
     // Cookies setzen als Fallback
     final cookieManager = WebViewCookieManager();
     final String domain = Uri.parse(_getInitialUrl()).host;
+
+    if (authToken != null) {
+      await cookieManager.setCookie(
+        WebViewCookie(name: 'auth_token', value: authToken, domain: domain, path: '/'),
+      );
+    }
+
     if (_fcmToken != null) {
       await cookieManager.setCookie(
         WebViewCookie(name: 'fcm_token', value: _fcmToken!, domain: domain, path: '/'),
@@ -179,6 +190,7 @@ Page resource error:
       ..loadRequest(
         Uri.parse(_getInitialUrl()),
         headers: {
+          if (authToken != null) 'Authorization': 'Bearer $authToken',
           if (_fcmToken != null) 'X-FCM-Token': _fcmToken!,
           if (_deviceId != null) 'X-Device-ID': _deviceId!,
         },

@@ -119,7 +119,7 @@ class MyApp extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      home: const WebViewScreen(),
+      home: const AuthWrapper(),
     );
   }
 }
@@ -147,8 +147,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    if (authProvider.isInitializing) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     if (authProvider.isAuthenticated) {
-      return const TasksScreen();
+      return const WebViewScreen();
     } else {
       return const LoginScreen();
     }

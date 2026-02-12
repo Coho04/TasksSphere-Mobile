@@ -9,10 +9,12 @@ import 'package:dio/dio.dart';
 class AuthProvider with ChangeNotifier {
   User? _user;
   bool _isAuthenticated = false;
+  bool _isInitializing = true;
   final ApiService _apiService = ApiService();
 
   User? get user => _user;
   bool get isAuthenticated => _isAuthenticated;
+  bool get isInitializing => _isInitializing;
 
   Future<bool> login(String email, String password) async {
     try {
@@ -62,6 +64,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> tryAutoLogin() async {
+    _isInitializing = true;
+    notifyListeners();
+    
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     String? userData = prefs.getString('user_data');
@@ -72,8 +77,9 @@ class AuthProvider with ChangeNotifier {
       
       // Update FCM Token on server after auto-login
       PushNotificationService.updateTokenOnServer();
-      
-      notifyListeners();
     }
+    
+    _isInitializing = false;
+    notifyListeners();
   }
 }
