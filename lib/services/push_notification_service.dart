@@ -3,12 +3,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'api_service.dart';
 
 class PushNotificationService {
   static final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  
+
   static final StreamController<RemoteMessage> _onMessageStreamController = StreamController<RemoteMessage>.broadcast();
   static Stream<RemoteMessage> get onMessageStream => _onMessageStreamController.stream;
 
@@ -126,7 +128,7 @@ class PushNotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
-      
+
       _onMessageStreamController.add(message);
 
       if (message.notification != null) {
@@ -144,7 +146,7 @@ class PushNotificationService {
 
   static Future<void> updateTokenOnServer([String? token]) async {
     if (!_isSupported) return;
-    
+
     try {
       String? fcmToken = token;
       if (fcmToken == null) {
@@ -158,12 +160,35 @@ class PushNotificationService {
 
       if (fcmToken != null) {
         final apiService = ApiService();
+
+        // Get device ID
+        String? deviceId;
         try {
-          // Dieser Endpoint muss in Laravel existieren
-          await apiService.dio.post('/user/fcm-token', data: {'fcm_token': fcmToken});
+          final deviceInfo = DeviceInfoPlugin();
+          if (kIsWeb) {
+            deviceId = 'web_browser';
+          } else if (Platform.isAndroid) {
+            final androidInfo = await deviceInfo.androidInfo;
+            deviceId = androidInfo.id;
+          } else if (Platform.isIOS) {
+            final iosInfo = await deviceInfo.iosInfo;
+            deviceId = iosInfo.identifierForVendor;
+          } else if (Platform.isMacOS) {
+            final macOsInfo = await deviceInfo.macOsInfo;
+            deviceId = macOsInfo.systemGUID;
+          }
+        } catch (e) {
+          debugPrint("Error getting device info: $e");
+        }
+
+        try {
+          await apiService.dio.post('/fcm-token', data: {
+            'fcm_token': fcmToken,
+            'device_id': deviceId,
+          });
           debugPrint("FCM Token updated on server");
         } catch (e) {
-          debugPrint("Error updating FCM token on server: $e (This is expected if the endpoint is not yet implemented)");
+          debugPrint("Error updating FCM token on server: $e");
         }
       }
     } catch (e) {

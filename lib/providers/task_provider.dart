@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import '../models/task_completion.dart';
 import '../services/api_service.dart';
 import '../services/push_notification_service.dart';
 import 'package:dio/dio.dart';
 
 class TaskProvider with ChangeNotifier {
   List<Task> _tasks = [];
+  List<TaskCompletion> _completedTasks = [];
   bool _isLoading = false;
   final ApiService _apiService = ApiService();
 
@@ -21,6 +23,7 @@ class TaskProvider with ChangeNotifier {
   }
 
   List<Task> get tasks => _tasks;
+  List<TaskCompletion> get completedTasks => _completedTasks;
   bool get isLoading => _isLoading;
 
   Future<void> fetchTasks() async {
@@ -29,9 +32,14 @@ class TaskProvider with ChangeNotifier {
     try {
       final response = await _apiService.dio.get('/tasks/occurrences');
       if (response.statusCode == 200) {
-        print(response.data);
         List<dynamic> data = response.data;
         _tasks = data.map((item) => Task.fromJson(item)).toList();
+      }
+
+      final completedResponse = await _apiService.dio.get('/tasks/completed');
+      if (completedResponse.statusCode == 200) {
+        List<dynamic> completedData = completedResponse.data;
+        _completedTasks = completedData.map((item) => TaskCompletion.fromJson(item)).toList();
       }
     } on DioException catch (e) {
       print('Fetch tasks error: ${e.response?.data}');
@@ -48,7 +56,7 @@ class TaskProvider with ChangeNotifier {
       });
       if (response.statusCode == 200) {
         _tasks.removeWhere((t) => t.id == task.id && t.plannedAt == task.plannedAt);
-        notifyListeners();
+        await fetchTasks(); // Neu laden, um completedTasks zu aktualisieren
         return true;
       }
     } catch (e) {

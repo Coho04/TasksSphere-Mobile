@@ -3,47 +3,54 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _login() async {
+  void _sendResetLink() async {
+    if (_emailController.text.isEmpty) return;
+
     setState(() => _isLoading = true);
-    final success = await Provider.of<AuthProvider>(context, listen: false)
-        .login(_emailController.text, _passwordController.text);
+    final message = await Provider.of<AuthProvider>(context, listen: false)
+        .forgotPassword(_emailController.text);
     setState(() => _isLoading = false);
 
-    if (!success && mounted) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.loginFailed)),
+        SnackBar(content: Text(message ?? AppLocalizations.of(context)!.resetLinkSent)),
       );
+      if (message != null && !message.contains('error') && !message.contains('falsch')) {
+        // Navigator.of(context).pop(); // Optional: Zurück zum Login
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(l10n.forgotPasswordTitle),
+        backgroundColor: Colors.transparent,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'images/taskssphere_only_logo.png',
-                height: 80,
+              Icon(
+                Icons.lock_reset,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 32),
               Container(
@@ -65,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.loginWelcome,
+                        l10n.forgotPasswordTitle,
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w900,
                               color: Theme.of(context).colorScheme.onSurface,
@@ -73,22 +80,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context)!.loginSubtitle,
+                        l10n.forgotPasswordSubtitle,
                         style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Text(
-                        AppLocalizations.of(context)!.email,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : const Color(0xFF374151),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      _buildLabel(l10n.email),
                       TextField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -97,24 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        AppLocalizations.of(context)!.password,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : const Color(0xFF374151),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          hintText: '••••••••',
-                          prefixIcon: Icon(Icons.lock_outline, size: 20),
-                        ),
-                        obscureText: true,
-                      ),
                       const SizedBox(height: 32),
                       _isLoading
                           ? const Center(child: CircularProgressIndicator())
@@ -122,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: double.infinity,
                               height: 45,
                               child: ElevatedButton(
-                                onPressed: _login,
+                                onPressed: _sendResetLink,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Theme.of(context).brightness == Brightness.dark
                                       ? const Color(0xFF3b82f6)
@@ -133,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   elevation: 0,
                                 ),
                                 child: Text(
-                                  AppLocalizations.of(context)!.loginButton,
+                                  l10n.sendResetLink,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -148,37 +129,31 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),
               TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-                  );
-                },
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  AppLocalizations.of(context)!.forgotPassword,
+                  l10n.backToLogin,
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                  );
-                },
-                child: Text(
-                  AppLocalizations.of(context)!.noAccount,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : const Color(0xFF374151),
         ),
       ),
     );

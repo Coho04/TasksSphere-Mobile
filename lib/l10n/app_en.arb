@@ -1,0 +1,75 @@
+{
+  "@@locale": "en",
+  "appTitle": "TasksSphere",
+  "loginWelcome": "Welcome back",
+  "loginSubtitle": "Log in to continue.",
+  "email": "Email",
+  "password": "Password",
+  "loginButton": "LOG IN",
+  "forgotPassword": "Forgot Password?",
+  "register": "Register",
+  "noAccount": "Don't have an account? Register here",
+  "alreadyHaveAccount": "Already have an account? Login here",
+  "passwordConfirmation": "Confirm Password",
+  "registerButton": "REGISTER",
+  "registrationFailed": "Registration failed. Please check your input.",
+  "sendResetLink": "SEND RESET LINK",
+  "forgotPasswordTitle": "Reset Password",
+  "forgotPasswordSubtitle": "Enter your email address and we will send you a link to reset your password.",
+  "resetLinkSent": "Reset link sent if the email address exists.",
+  "backToLogin": "Back to Login",
+  "loginFailed": "Login failed. Please check your data.",
+  "taskOverview": "Task Overview",
+  "tasksToday": "You have {count} open tasks today.",
+  "@tasksToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noTasksTitle": "All done!",
+  "noTasksSubtitle": "Time to relax.",
+  "overdue": "Overdue",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "later": "Later",
+  "noDate": "No Date",
+  "completedRecently": "Recently completed",
+  "completedAtMinutes": "Completed {minutes} min. ago",
+  "@completedAtMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "add": "Add",
+  "cancel": "Cancel",
+  "create": "Create",
+  "newTask": "New Task",
+  "whatToDo": "What's to do?",
+  "detailsOptional": "Details (optional)",
+  "tasks": "Tasks",
+  "editProfile": "Edit Profile",
+  "logout": "Logout",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "newPasswordOptional": "New password (optional)",
+  "confirmPassword": "Confirm password",
+  "saveChanges": "Save changes",
+  "profileUpdated": "Profile successfully updated.",
+  "profileUpdateFailed": "Error updating profile.",
+  "uhr": "O'CLOCK",
+  "personalInfo": "Personal Information",
+  "changePassword": "Change Password",
+  "leaveBlank": "Leave blank if you do not want to change it.",
+  "enterFirstName": "Please enter first name",
+  "enterLastName": "Please enter last name",
+  "invalidEmail": "Invalid email",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordTooShort": "Password must be at least 8 characters long",
+  "language": "Language",
+  "german": "German",
+  "english": "English"
+}

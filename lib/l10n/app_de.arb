@@ -1,0 +1,75 @@
+{
+  "@@locale": "de",
+  "appTitle": "TasksSphere",
+  "loginWelcome": "Willkommen zurück",
+  "loginSubtitle": "Melden Sie sich an, um fortzufahren.",
+  "email": "Email",
+  "password": "Passwort",
+  "loginButton": "LOG IN",
+  "forgotPassword": "Passwort vergessen?",
+  "register": "Registrieren",
+  "noAccount": "Noch kein Konto? Hier registrieren",
+  "alreadyHaveAccount": "Bereits ein Konto? Hier anmelden",
+  "passwordConfirmation": "Passwort bestätigen",
+  "registerButton": "REGISTRIEREN",
+  "registrationFailed": "Registrierung fehlgeschlagen. Bitte überprüfe deine Eingaben.",
+  "sendResetLink": "RESET-LINK SENDEN",
+  "forgotPasswordTitle": "Passwort zurücksetzen",
+  "forgotPasswordSubtitle": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+  "resetLinkSent": "Reset-Link wurde gesendet, falls die E-Mail-Adresse existiert.",
+  "backToLogin": "Zurück zum Login",
+  "loginFailed": "Login fehlgeschlagen. Bitte prüfen Sie Ihre Daten.",
+  "taskOverview": "Aufgabenübersicht",
+  "tasksToday": "Du hast heute {count} offene Aufgaben.",
+  "@tasksToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noTasksTitle": "Alles erledigt!",
+  "noTasksSubtitle": "Zeit zum Entspannen.",
+  "overdue": "Überfällig",
+  "today": "Heute",
+  "tomorrow": "Morgen",
+  "later": "Später",
+  "noDate": "Ohne Datum",
+  "completedRecently": "Zuletzt erledigt",
+  "completedAtMinutes": "Erledigt vor {minutes} Min.",
+  "@completedAtMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "add": "Hinzufügen",
+  "cancel": "Abbrechen",
+  "create": "Erstellen",
+  "newTask": "Neuer Task",
+  "whatToDo": "Was ist zu tun?",
+  "detailsOptional": "Details (optional)",
+  "tasks": "Aufgaben",
+  "editProfile": "Profil bearbeiten",
+  "logout": "Abmelden",
+  "firstName": "Vorname",
+  "lastName": "Nachname",
+  "newPasswordOptional": "Neues Passwort (optional)",
+  "confirmPassword": "Passwort bestätigen",
+  "saveChanges": "Änderungen speichern",
+  "profileUpdated": "Profil erfolgreich aktualisiert.",
+  "profileUpdateFailed": "Fehler beim Aktualisieren des Profils.",
+  "uhr": "UHR",
+  "personalInfo": "Persönliche Informationen",
+  "changePassword": "Passwort ändern",
+  "leaveBlank": "Leer lassen, wenn Sie es nicht ändern möchten.",
+  "enterFirstName": "Bitte Vorname eingeben",
+  "enterLastName": "Bitte Nachname eingeben",
+  "invalidEmail": "Ungültige E-Mail",
+  "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+  "passwordTooShort": "Passwort muss mindestens 8 Zeichen lang sein",
+  "language": "Sprache",
+  "german": "Deutsch",
+  "english": "Englisch"
+}
