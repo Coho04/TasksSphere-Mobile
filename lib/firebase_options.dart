@@ -45,7 +45,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDgu1NkDjixMbtNpe6GX4GJWK8ZJ8mUlyo',
-    appId: '1:237449985042:android:3905959e2f206902966ccb',
+    appId: '1:237449985042:android:26805f7febdce07c966ccb',
     messagingSenderId: '237449985042',
     projectId: 'taskssphere',
     storageBucket: 'taskssphere.firebasestorage.app',
@@ -53,20 +53,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB3r7JwHEmhnJjebh95PMCSAenbeJS4IdE',
-    appId: '1:237449985042:ios:854773e537b10d4e966ccb',
+    appId: '1:237449985042:ios:180cf20b0ffead61966ccb',
     messagingSenderId: '237449985042',
     projectId: 'taskssphere',
     storageBucket: 'taskssphere.firebasestorage.app',
-    iosBundleId: 'de.codesphere.todo',
+    iosBundleId: 'de.codesphere.taskssphere',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyB3r7JwHEmhnJjebh95PMCSAenbeJS4IdE',
-    appId: '1:237449985042:ios:854773e537b10d4e966ccb',
+    appId: '1:237449985042:ios:180cf20b0ffead61966ccb',
     messagingSenderId: '237449985042',
     projectId: 'taskssphere',
     storageBucket: 'taskssphere.firebasestorage.app',
-    iosBundleId: 'de.codesphere.todo',
+    iosBundleId: 'de.codesphere.taskssphere',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

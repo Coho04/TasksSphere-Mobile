@@ -38,12 +38,13 @@ class PushNotificationService {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // iOS initialization settings
-    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings();
+    // iOS and macOS initialization settings
+    const DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
 
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
+      iOS: initializationSettingsDarwin,
+      macOS: initializationSettingsDarwin,
     );
 
     await _localNotificationsPlugin.initialize(

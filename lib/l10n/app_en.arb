@@ -71,5 +71,18 @@
   "passwordTooShort": "Password must be at least 8 characters long",
   "language": "Language",
   "german": "German",
-  "english": "English"
+  "english": "English",
+  "dateAndTime": "Date & Time",
+  "repetition": "Repetition",
+  "once": "Once",
+  "hourly": "Hourly",
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "weekdays": "Weekdays",
+  "addTime": "Add time",
+  "timesForInterval": "Set times per interval:",
+  "timezone": "Timezone",
+  "startAtOptional": "Starts at (optional)",
+  "defaultToday": "Default is today."
 }

@@ -65,12 +65,16 @@ class TaskProvider with ChangeNotifier {
     return false;
   }
 
-  Future<bool> createTask(String title, String? description, DateTime? dueAt) async {
+  Future<bool> createTask(String title, String? description, DateTime? dueAt,
+      {Map<String, dynamic>? recurrenceRule,
+      String? recurrenceTimezone}) async {
     try {
       final response = await _apiService.dio.post('/tasks', data: {
         'title': title,
         'description': description,
         'due_at': dueAt?.toIso8601String(),
+        'recurrence_rule': recurrenceRule,
+        'recurrence_timezone': recurrenceTimezone,
       });
       if (response.statusCode == 201 || response.statusCode == 200) {
         await fetchTasks();

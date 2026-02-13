@@ -24,49 +24,301 @@ class _TasksScreenState extends State<TasksScreen> {
   void _showAddTaskDialog() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
+    DateTime? selectedDate = DateTime.now();
+    TimeOfDay? selectedTime = TimeOfDay.now();
+    String frequency = 'none';
+    int interval = 1;
+    List<int> selectedWeekdays = [];
+    List<String> times = [];
+    String? recurrenceTimezone = 'Europe/Berlin'; // Default
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.newTask),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.whatToDo,
-                prefixIcon: const Icon(Icons.title),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.newTask),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.whatToDo,
+                      prefixIcon: const Icon(Icons.title),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: descController,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.detailsOptional,
+                      prefixIcon: const Icon(Icons.description_outlined),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Datum & Uhrzeit Sektion
+                  Text(AppLocalizations.of(context)!.dateAndTime,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate ?? DateTime.now(),
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 3650)),
+                            );
+                            if (date != null) {
+                              setState(() => selectedDate = date);
+                            }
+                          },
+                          icon: const Icon(Icons.calendar_today, size: 18),
+                          label: Text(selectedDate == null
+                              ? AppLocalizations.of(context)!.noDate
+                              : DateFormat('dd.MM.yyyy').format(selectedDate!)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (frequency == 'none')
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: selectedTime ?? TimeOfDay.now(),
+                              );
+                              if (time != null) {
+                                setState(() => selectedTime = time);
+                              }
+                            },
+                            icon: const Icon(Icons.access_time, size: 18),
+                            label: Text(selectedTime == null
+                                ? '--:--'
+                                : selectedTime!.format(context)),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+                  // Wiederholung Sektion
+                  Text(AppLocalizations.of(context)!.repetition,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: frequency,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                          value: 'none',
+                          child: Text(AppLocalizations.of(context)!.once)),
+                      DropdownMenuItem(
+                          value: 'hourly',
+                          child: Text(AppLocalizations.of(context)!.hourly)),
+                      DropdownMenuItem(
+                          value: 'daily',
+                          child: Text(AppLocalizations.of(context)!.daily)),
+                      DropdownMenuItem(
+                          value: 'weekly',
+                          child: Text(AppLocalizations.of(context)!.weekly)),
+                      DropdownMenuItem(
+                          value: 'monthly',
+                          child: Text(AppLocalizations.of(context)!.monthly)),
+                    ],
+                    onChanged: (val) => setState(() => frequency = val!),
+                  ),
+
+                  if (frequency != 'none') ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Text("Intervall:",
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 60,
+                          child: TextFormField(
+                            initialValue: interval.toString(),
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (val) {
+                              final i = int.tryParse(val);
+                              if (i != null) interval = i;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  if (frequency == 'weekly') ...[
+                    const SizedBox(height: 16),
+                    Text(AppLocalizations.of(context)!.weekdays,
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 4,
+                      children: [1, 2, 3, 4, 5, 6, 7].map((day) {
+                        final isSelected = selectedWeekdays.contains(day);
+                        final dayLabels = {
+                          1: 'Mo',
+                          2: 'Di',
+                          3: 'Mi',
+                          4: 'Do',
+                          5: 'Fr',
+                          6: 'Sa',
+                          7: 'So'
+                        };
+                        return FilterChip(
+                          label: Text(dayLabels[day]!),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                selectedWeekdays.add(day);
+                              } else {
+                                selectedWeekdays.remove(day);
+                              }
+                            });
+                          },
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+
+                  if (frequency != 'none') ...[
+                    const SizedBox(height: 16),
+                    Text(AppLocalizations.of(context)!.addTime,
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if (time != null) {
+                                final timeStr =
+                                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                                if (!times.contains(timeStr)) {
+                                  setState(() {
+                                    times.add(timeStr);
+                                    times.sort();
+                                  });
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.add_time),
+                            label: Text(AppLocalizations.of(context)!.add),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (times.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(AppLocalizations.of(context)!.timesForInterval,
+                          style: const TextStyle(fontSize: 11)),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        children: times.asMap().entries.map((entry) {
+                          return Chip(
+                            label: Text(entry.value,
+                                style: const TextStyle(fontSize: 12)),
+                            onDeleted: () =>
+                                setState(() => times.removeAt(entry.key)),
+                            deleteIcon: const Icon(Icons.close, size: 14),
+                            visualDensity: VisualDensity.compact,
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.detailsOptional,
-                prefixIcon: const Icon(Icons.description_outlined),
-              ),
-              maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(AppLocalizations.of(context)!.cancel,
+                  style: const TextStyle(color: Color(0xFF6b7280))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isNotEmpty) {
+                  DateTime? dueAt;
+                  if (selectedDate != null) {
+                    dueAt = DateTime(
+                      selectedDate!.year,
+                      selectedDate!.month,
+                      selectedDate!.day,
+                      selectedTime?.hour ?? 0,
+                      selectedTime?.minute ?? 0,
+                    );
+                  }
+
+                  Map<String, dynamic>? recurrenceRule;
+                  if (frequency != 'none') {
+                    recurrenceRule = {
+                      'frequency': frequency,
+                      'interval': interval,
+                      'times': times,
+                      'weekdays':
+                          frequency == 'weekly' ? selectedWeekdays : [],
+                    };
+                  }
+
+                  final success =
+                      await Provider.of<TaskProvider>(context, listen: false)
+                          .createTask(
+                    titleController.text,
+                    descController.text,
+                    dueAt,
+                    recurrenceRule: recurrenceRule,
+                    recurrenceTimezone: recurrenceTimezone,
+                  );
+                  if (success && mounted) Navigator.of(ctx).pop();
+                }
+              },
+              child: Text(AppLocalizations.of(context)!.create),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Color(0xFF6b7280))),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (titleController.text.isNotEmpty) {
-                final success = await Provider.of<TaskProvider>(context, listen: false)
-                    .createTask(titleController.text, descController.text, null);
-                if (success && mounted) Navigator.of(ctx).pop();
-              }
-            },
-            child: Text(AppLocalizations.of(context)!.create),
-          ),
-        ],
       ),
     );
   }

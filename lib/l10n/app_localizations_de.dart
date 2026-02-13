@@ -189,4 +189,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get english => 'Englisch';
+
+  @override
+  String get dateAndTime => 'Datum & Uhrzeit';
+
+  @override
+  String get repetition => 'Wiederholung';
+
+  @override
+  String get once => 'Einmalig';
+
+  @override
+  String get hourly => 'Stündlich';
+
+  @override
+  String get daily => 'Täglich';
+
+  @override
+  String get weekly => 'Wöchentlich';
+
+  @override
+  String get monthly => 'Monatlich';
+
+  @override
+  String get weekdays => 'Wochentage';
+
+  @override
+  String get addTime => 'Uhrzeit hinzufügen';
+
+  @override
+  String get timesForInterval => 'Festgelegte Uhrzeiten pro Intervall:';
+
+  @override
+  String get timezone => 'Zeitzone';
+
+  @override
+  String get startAtOptional => 'Startet am (optional)';
+
+  @override
+  String get defaultToday => 'Standardmäßig heute.';
 }

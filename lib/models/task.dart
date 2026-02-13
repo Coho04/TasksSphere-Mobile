@@ -7,6 +7,8 @@ class Task {
   final DateTime? plannedAt; // Für Occurrences
   final bool isActive;
   final bool isArchived;
+  final Map<String, dynamic>? recurrenceRule;
+  final String? recurrenceTimezone;
 
   Task({
     required this.id,
@@ -17,6 +19,8 @@ class Task {
     this.plannedAt,
     required this.isActive,
     required this.isArchived,
+    this.recurrenceRule,
+    this.recurrenceTimezone,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class Task {
       plannedAt: plannedAtStr != null ? DateTime.parse(plannedAtStr) : null,
       isActive: data['is_active'] == 1 || data['is_active'] == true,
       isArchived: data['is_archived'] == 1 || data['is_archived'] == true,
+      recurrenceRule: data['recurrence_rule'],
+      recurrenceTimezone: data['recurrence_timezone'],
     );
   }
 
@@ -45,6 +51,8 @@ class Task {
       'planned_at': plannedAt?.toIso8601String(),
       'is_active': isActive,
       'is_archived': isArchived,
+      'recurrence_rule': recurrenceRule,
+      'recurrence_timezone': recurrenceTimezone,
     };
   }
 }

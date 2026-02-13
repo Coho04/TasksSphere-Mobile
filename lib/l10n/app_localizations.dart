@@ -445,6 +445,84 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Englisch'**
   String get english;
+
+  /// No description provided for @dateAndTime.
+  ///
+  /// In de, this message translates to:
+  /// **'Datum & Uhrzeit'**
+  String get dateAndTime;
+
+  /// No description provided for @repetition.
+  ///
+  /// In de, this message translates to:
+  /// **'Wiederholung'**
+  String get repetition;
+
+  /// No description provided for @once.
+  ///
+  /// In de, this message translates to:
+  /// **'Einmalig'**
+  String get once;
+
+  /// No description provided for @hourly.
+  ///
+  /// In de, this message translates to:
+  /// **'Stündlich'**
+  String get hourly;
+
+  /// No description provided for @daily.
+  ///
+  /// In de, this message translates to:
+  /// **'Täglich'**
+  String get daily;
+
+  /// No description provided for @weekly.
+  ///
+  /// In de, this message translates to:
+  /// **'Wöchentlich'**
+  String get weekly;
+
+  /// No description provided for @monthly.
+  ///
+  /// In de, this message translates to:
+  /// **'Monatlich'**
+  String get monthly;
+
+  /// No description provided for @weekdays.
+  ///
+  /// In de, this message translates to:
+  /// **'Wochentage'**
+  String get weekdays;
+
+  /// No description provided for @addTime.
+  ///
+  /// In de, this message translates to:
+  /// **'Uhrzeit hinzufügen'**
+  String get addTime;
+
+  /// No description provided for @timesForInterval.
+  ///
+  /// In de, this message translates to:
+  /// **'Festgelegte Uhrzeiten pro Intervall:'**
+  String get timesForInterval;
+
+  /// No description provided for @timezone.
+  ///
+  /// In de, this message translates to:
+  /// **'Zeitzone'**
+  String get timezone;
+
+  /// No description provided for @startAtOptional.
+  ///
+  /// In de, this message translates to:
+  /// **'Startet am (optional)'**
+  String get startAtOptional;
+
+  /// No description provided for @defaultToday.
+  ///
+  /// In de, this message translates to:
+  /// **'Standardmäßig heute.'**
+  String get defaultToday;
 }
 
 class _AppLocalizationsDelegate
