@@ -30,13 +30,20 @@ class _TasksScreenState extends State<TasksScreen> {
     int interval = 1;
     List<int> selectedWeekdays = [];
     List<String> times = [];
+    TimeOfDay? tempTime;
     String? recurrenceTimezone = 'Europe/Berlin'; // Default
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(AppLocalizations.of(context)!.newTask),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.newTask,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+            ),
+          ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           content: SizedBox(
@@ -53,6 +60,8 @@ class _TasksScreenState extends State<TasksScreen> {
                       prefixIcon: const Icon(Icons.title),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -63,65 +72,91 @@ class _TasksScreenState extends State<TasksScreen> {
                       prefixIcon: const Icon(Icons.description_outlined),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
                     ),
                     maxLines: 2,
                   ),
                   const SizedBox(height: 20),
 
-                  // Datum & Uhrzeit Sektion
                   Text(AppLocalizations.of(context)!.dateAndTime,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final date = await showDatePicker(
-                              context: context,
-                              initialDate: selectedDate ?? DateTime.now(),
-                              firstDate: DateTime.now()
-                                  .subtract(const Duration(days: 365)),
-                              lastDate:
-                                  DateTime.now().add(const Duration(days: 3650)),
-                            );
-                            if (date != null) {
-                              setState(() => selectedDate = date);
-                            }
-                          },
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: Text(selectedDate == null
-                              ? AppLocalizations.of(context)!.noDate
-                              : DateFormat('dd.MM.yyyy').format(selectedDate!)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
+                          fontSize: 14)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        alignment: Alignment.centerLeft,
+                      ),
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate: DateTime.now()
+                              .subtract(const Duration(days: 365)),
+                          lastDate: DateTime.now()
+                              .add(const Duration(days: 3650)),
+                        );
+                        if (date != null) {
+                          setState(() => selectedDate = date);
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 20),
+                      label: Text(
+                        selectedDate == null
+                            ? AppLocalizations.of(context)!.noDate
+                            : DateFormat('dd.MM.yyyy').format(selectedDate!),
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ),
+                  if (frequency == 'none') ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: () async {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: selectedTime ?? TimeOfDay.now(),
+                          );
+                          if (time != null) {
+                            setState(() => selectedTime = time);
+                          }
+                        },
+                        icon: const Icon(Icons.access_time, size: 20),
+                        label: Text(
+                          selectedTime == null
+                              ? '--:--'
+                              : selectedTime!.format(context),
+                          style: const TextStyle(fontSize: 15),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      if (frequency == 'none')
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final time = await showTimePicker(
-                                context: context,
-                                initialTime: selectedTime ?? TimeOfDay.now(),
-                              );
-                              if (time != null) {
-                                setState(() => selectedTime = time);
-                              }
-                            },
-                            icon: const Icon(Icons.access_time, size: 18),
-                            label: Text(selectedTime == null
-                                ? '--:--'
-                                : selectedTime!.format(context)),
-                          ),
-                        ),
-                    ],
-                  ),
+                    ),
+                  ],
 
                   const SizedBox(height: 20),
                   // Wiederholung Sektion
                   Text(AppLocalizations.of(context)!.repetition,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
+                          fontSize: 14)),
+                  const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     value: frequency,
                     decoration: InputDecoration(
@@ -179,13 +214,16 @@ class _TasksScreenState extends State<TasksScreen> {
                   ],
 
                   if (frequency == 'weekly') ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(AppLocalizations.of(context)!.weekdays,
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[700])),
+                    const SizedBox(height: 12),
                     Wrap(
-                      spacing: 4,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [1, 2, 3, 4, 5, 6, 7].map((day) {
                         final isSelected = selectedWeekdays.contains(day);
                         final dayLabels = {
@@ -199,7 +237,14 @@ class _TasksScreenState extends State<TasksScreen> {
                         };
                         return FilterChip(
                           label: Text(dayLabels[day]!),
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
                           selected: isSelected,
+                          selectedColor: Colors.blue[600],
+                          checkmarkColor: Colors.white,
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -209,60 +254,112 @@ class _TasksScreenState extends State<TasksScreen> {
                               }
                             });
                           },
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                         );
                       }).toList(),
                     ),
                   ],
 
                   if (frequency != 'none') ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     Text(AppLocalizations.of(context)!.addTime,
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[900])),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              alignment: Alignment.centerLeft,
+                            ),
                             onPressed: () async {
                               final time = await showTimePicker(
                                 context: context,
-                                initialTime: TimeOfDay.now(),
+                                initialTime: tempTime ?? TimeOfDay.now(),
                               );
                               if (time != null) {
-                                final timeStr =
-                                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-                                if (!times.contains(timeStr)) {
-                                  setState(() {
-                                    times.add(timeStr);
-                                    times.sort();
-                                  });
-                                }
+                                setState(() => tempTime = time);
                               }
                             },
-                            icon: const Icon(Icons.add_time),
-                            label: Text(AppLocalizations.of(context)!.add),
+                            icon: const Icon(Icons.access_time, size: 22),
+                            label: Text(
+                              tempTime == null
+                                  ? '--:--'
+                                  : tempTime!.format(context),
+                              style: const TextStyle(fontSize: 17),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[600],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 2,
+                          ),
+                          onPressed: () {
+                            if (tempTime != null) {
+                              final timeStr =
+                                  '${tempTime!.hour.toString().padLeft(2, '0')}:${tempTime!.minute.toString().padLeft(2, '0')}';
+                              if (!times.contains(timeStr)) {
+                                setState(() {
+                                  times.add(timeStr);
+                                  times.sort();
+                                  tempTime = null;
+                                });
+                              }
+                            }
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.add,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ),
                       ],
                     ),
                     if (times.isNotEmpty) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
                       Text(AppLocalizations.of(context)!.timesForInterval,
-                          style: const TextStyle(fontSize: 11)),
-                      const SizedBox(height: 4),
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700])),
+                      const SizedBox(height: 12),
                       Wrap(
-                        spacing: 8,
-                        children: times.asMap().entries.map((entry) {
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: times.map((t) {
                           return Chip(
-                            label: Text(entry.value,
-                                style: const TextStyle(fontSize: 12)),
-                            onDeleted: () =>
-                                setState(() => times.removeAt(entry.key)),
-                            deleteIcon: const Icon(Icons.close, size: 14),
-                            visualDensity: VisualDensity.compact,
+                            label: Text(
+                                '$t ${AppLocalizations.of(context)!.uhr}',
+                                style: TextStyle(
+                                  color: Colors.blue[800],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                )),
+                            backgroundColor: Colors.blue[50],
+                            deleteIcon: Icon(Icons.close,
+                                size: 18, color: Colors.blue[800]),
+                            onDeleted: () => setState(() => times.remove(t)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.blue[200]!),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
                           );
                         }).toList(),
                       ),

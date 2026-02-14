@@ -155,7 +155,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileUpdateFailed => 'Fehler beim Aktualisieren des Profils.';
 
   @override
-  String get uhr => 'UHR';
+  String get uhr => 'Uhr';
 
   @override
   String get personalInfo => 'Persönliche Informationen';

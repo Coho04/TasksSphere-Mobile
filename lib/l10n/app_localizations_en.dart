@@ -153,7 +153,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUpdateFailed => 'Error updating profile.';
 
   @override
-  String get uhr => 'O\'CLOCK';
+  String get uhr => 'o\'clock';
 
   @override
   String get personalInfo => 'Personal Information';

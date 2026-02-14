@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @uhr.
   ///
   /// In de, this message translates to:
-  /// **'UHR'**
+  /// **'Uhr'**
   String get uhr;
 
   /// No description provided for @personalInfo.
