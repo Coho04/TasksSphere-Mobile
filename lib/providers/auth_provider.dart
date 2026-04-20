@@ -198,11 +198,32 @@ class AuthProvider with ChangeNotifier {
     String? userData = prefs.getString('user_data');
 
     if (token != null && userData != null) {
+      // Sofort lokale Daten laden für schnelle UI
       _user = User.fromJson(jsonDecode(userData));
       _isAuthenticated = true;
 
-      // Update FCM Token on server after auto-login
-      PushNotificationService.updateTokenOnServer();
+      // Token beim Server validieren und Profil aktualisieren
+      try {
+        final response = await _apiService.dio.get('/profile');
+        if (response.statusCode == 200) {
+          final serverUserData = response.data['user'] ?? response.data;
+          _user = User.fromJson(serverUserData);
+          await prefs.setString('user_data', jsonEncode(_user!.toJson()));
+
+          // Update FCM Token on server after successful auto-login
+          await PushNotificationService.updateTokenOnServer();
+        }
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 401) {
+          // Token ist serverseitig ungültig - ausloggen
+          _user = null;
+          _isAuthenticated = false;
+          await prefs.remove('auth_token');
+          await prefs.remove('user_data');
+        }
+        // Bei Netzwerkfehlern (kein Internet etc.) eingeloggt bleiben
+        // mit den lokalen Daten
+      }
     }
 
     _isInitializing = false;

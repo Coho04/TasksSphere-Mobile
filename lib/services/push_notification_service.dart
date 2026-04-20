@@ -95,21 +95,18 @@ class PushNotificationService {
       updateTokenOnServer(newToken);
     });
 
-    // Get FCM Token
+    // Get FCM Token (don't send to server yet - user may not be authenticated)
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
         // Auf iOS/macOS warten wir kurz auf den APNS-Token
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 10; i++) {
           String? apnsToken = await _fcm.getAPNSToken();
           if (apnsToken != null) {
             String? token = await _fcm.getToken();
             debugPrint("FCM Token: $token");
-            if (token != null) {
-              updateTokenOnServer(token);
-            }
             break;
           }
-          if (i < 5) {
+          if (i < 9) {
             debugPrint("Waiting for APNS token in PushNotificationService (attempt ${i + 1})...");
             await Future.delayed(const Duration(milliseconds: 500));
           }
@@ -117,9 +114,6 @@ class PushNotificationService {
       } else {
         String? token = await _fcm.getToken();
         debugPrint("FCM Token: $token");
-        if (token != null) {
-          updateTokenOnServer(token);
-        }
       }
     } catch (e) {
       debugPrint("Error getting FCM token: $e");
@@ -152,7 +146,16 @@ class PushNotificationService {
       String? fcmToken = token;
       if (fcmToken == null) {
         if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
-          if (await _fcm.getAPNSToken() == null) {
+          // Wait for APNS token with retry (required before FCM token on iOS)
+          String? apnsToken;
+          for (int i = 0; i < 10; i++) {
+            apnsToken = await _fcm.getAPNSToken();
+            if (apnsToken != null) break;
+            debugPrint("Waiting for APNS token (attempt ${i + 1}/10)...");
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+          if (apnsToken == null) {
+            debugPrint("APNS token unavailable after retries - cannot register for push notifications");
             return;
           }
         }
