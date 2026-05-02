@@ -7,4 +7,7 @@ abstract class TaskRepository {
   Future<bool> createTask(String title, String? description, DateTime? dueAt,
       {Map<String, dynamic>? recurrenceRule, String? recurrenceTimezone});
   Future<bool> completeTask(Task task);
+  Future<bool> updateTask(int taskId, String title, String? description, DateTime? dueAt,
+      {Map<String, dynamic>? recurrenceRule, String? recurrenceTimezone});
+  Future<bool> deleteTask(int taskId);
 }

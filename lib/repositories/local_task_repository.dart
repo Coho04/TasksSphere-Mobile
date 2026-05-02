@@ -209,6 +209,36 @@ class LocalTaskRepository implements TaskRepository {
     );
   }
 
+  @override
+  Future<bool> updateTask(int taskId, String title, String? description, DateTime? dueAt,
+      {Map<String, dynamic>? recurrenceRule, String? recurrenceTimezone}) async {
+    try {
+      final db = await _db.database;
+      await db.update('tasks', {
+        'title': title,
+        'description': description,
+        'due_at': dueAt?.toIso8601String(),
+        'recurrence_rule': recurrenceRule != null ? jsonEncode(recurrenceRule) : null,
+        'recurrence_timezone': recurrenceTimezone,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, where: 'id = ?', whereArgs: [taskId]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteTask(int taskId) async {
+    try {
+      final db = await _db.database;
+      await db.delete('tasks', where: 'id = ?', whereArgs: [taskId]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Get all tasks as raw maps (for migration to cloud)
   Future<List<Map<String, dynamic>>> getAllTasksRaw() async {
     final db = await _db.database;

@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/task_provider.dart';
+import '../models/task.dart';
 import 'profile_screen.dart';
+import 'lists_screen.dart';
+import 'calendar_screen.dart';
+import 'stats_screen.dart';
 import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 
@@ -420,6 +424,204 @@ class _TasksScreenState extends State<TasksScreen> {
     );
   }
 
+  void _showTaskOptionsSheet(Task task) {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('Bearbeiten'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showEditTaskDialog(task);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text('Löschen', style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (c) => AlertDialog(
+                    title: const Text('Aufgabe löschen?'),
+                    content: Text('Möchtest du "${task.title}" wirklich löschen?'),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(c, false),
+                          child: const Text('Abbrechen')),
+                      TextButton(
+                          onPressed: () => Navigator.pop(c, true),
+                          child: const Text('Löschen',
+                              style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await taskProvider.deleteTask(task.id);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditTaskDialog(Task task) {
+    final titleController = TextEditingController(text: task.title);
+    final descController = TextEditingController(text: task.description ?? '');
+    DateTime? selectedDate = task.dueAt;
+    TimeOfDay? selectedTime = task.dueAt != null
+        ? TimeOfDay(hour: task.dueAt!.hour, minute: task.dueAt!.minute)
+        : null;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: Text('Aufgabe bearbeiten',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Titel',
+                      prefixIcon: const Icon(Icons.title),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: descController,
+                    decoration: InputDecoration(
+                      labelText: 'Beschreibung (optional)',
+                      prefixIcon: const Icon(Icons.description_outlined),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    ),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        alignment: Alignment.centerLeft,
+                      ),
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate:
+                              DateTime.now().subtract(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(const Duration(days: 3650)),
+                        );
+                        if (date != null) setState(() => selectedDate = date);
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 20),
+                      label: Text(
+                        selectedDate == null
+                            ? 'Kein Datum'
+                            : DateFormat('dd.MM.yyyy').format(selectedDate!),
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        alignment: Alignment.centerLeft,
+                      ),
+                      onPressed: () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime ?? TimeOfDay.now(),
+                        );
+                        if (time != null) setState(() => selectedTime = time);
+                      },
+                      icon: const Icon(Icons.access_time, size: 20),
+                      label: Text(
+                        selectedTime == null
+                            ? '--:--'
+                            : selectedTime!.format(context),
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Abbrechen',
+                  style: TextStyle(color: Color(0xFF6b7280))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isNotEmpty) {
+                  DateTime? dueAt;
+                  if (selectedDate != null) {
+                    dueAt = DateTime(
+                      selectedDate!.year,
+                      selectedDate!.month,
+                      selectedDate!.day,
+                      selectedTime?.hour ?? 0,
+                      selectedTime?.minute ?? 0,
+                    );
+                  }
+                  final success =
+                      await Provider.of<TaskProvider>(context, listen: false)
+                          .updateTask(
+                    task.id,
+                    titleController.text,
+                    descController.text.isEmpty ? null : descController.text,
+                    dueAt,
+                    recurrenceRule: task.recurrenceRule,
+                    recurrenceTimezone: task.recurrenceTimezone,
+                  );
+                  if (success && mounted) Navigator.of(ctx).pop();
+                }
+              },
+              child: const Text('Speichern'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Map<String, List<dynamic>> _groupTasks(List<dynamic> tasks) {
     final Map<String, List<dynamic>> groups = {};
     final now = DateTime.now();
@@ -475,6 +677,39 @@ class _TasksScreenState extends State<TasksScreen> {
             leading: const Icon(Icons.task_alt),
             title: Text(AppLocalizations.of(context)!.tasks),
             onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.list_alt),
+            title: const Text('Listen'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ListsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('Kalender'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bar_chart),
+            title: const Text('Statistik'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StatsScreen()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
@@ -661,7 +896,10 @@ class _TasksScreenState extends State<TasksScreen> {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),
                               onTap: () {
-                                // Detailansicht oder Editieren
+                                _showEditTaskDialog(task);
+                              },
+                              onLongPress: () {
+                                _showTaskOptionsSheet(task);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),

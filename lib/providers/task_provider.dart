@@ -84,4 +84,32 @@ class TaskProvider with ChangeNotifier {
     }
     return false;
   }
+
+  Future<bool> updateTask(int taskId, String title, String? description, DateTime? dueAt,
+      {Map<String, dynamic>? recurrenceRule, String? recurrenceTimezone}) async {
+    try {
+      final success = await _repository.updateTask(taskId, title, description, dueAt,
+          recurrenceRule: recurrenceRule, recurrenceTimezone: recurrenceTimezone);
+      if (success) {
+        await fetchTasks();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Update task error: $e');
+    }
+    return false;
+  }
+
+  Future<bool> deleteTask(int taskId) async {
+    try {
+      final success = await _repository.deleteTask(taskId);
+      if (success) {
+        await fetchTasks();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Delete task error: $e');
+    }
+    return false;
+  }
 }

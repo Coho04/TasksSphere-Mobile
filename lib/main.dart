@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
 import 'providers/task_provider.dart';
+import 'providers/list_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/tasks_screen.dart';
@@ -33,6 +34,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => ListProvider()),
       ],
       child: const MyApp(),
     ),
@@ -267,6 +269,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     } else if (mode == 'local') {
       if (mounted) {
         Provider.of<TaskProvider>(context, listen: false).setLocalMode();
+        Provider.of<ListProvider>(context, listen: false).setLocalMode(true);
       }
       setState(() => _storageMode = 'local');
     } else {

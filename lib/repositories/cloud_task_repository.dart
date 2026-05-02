@@ -54,4 +54,31 @@ class CloudTaskRepository implements TaskRepository {
       return false;
     }
   }
+
+  @override
+  Future<bool> updateTask(int taskId, String title, String? description, DateTime? dueAt,
+      {Map<String, dynamic>? recurrenceRule, String? recurrenceTimezone}) async {
+    try {
+      final response = await _apiService.dio.put('/tasks/$taskId', data: {
+        'title': title,
+        'description': description,
+        'due_at': dueAt?.toIso8601String(),
+        'recurrence_rule': recurrenceRule,
+        'recurrence_timezone': recurrenceTimezone,
+      });
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteTask(int taskId) async {
+    try {
+      final response = await _apiService.dio.delete('/tasks/$taskId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }
